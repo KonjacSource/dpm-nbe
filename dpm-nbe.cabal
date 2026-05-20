@@ -1,0 +1,56 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           dpm-nbe
+version:        0.1.0.0
+description:    Do dependent pattern matching under normalization by evaluation setup
+category:       Language
+homepage:       https://github.com/KonjacSource/dpm-nbe#readme
+bug-reports:    https://github.com/KonjacSource/dpm-nbe/issues
+author:         Qu Zhuoyuan
+maintainer:     quzhuoyuan@gmail.com
+copyright:      2026 Qu Zhuoyuan
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/KonjacSource/dpm-nbe
+
+executable dpm-nbe
+  main-is: Main.hs
+  other-modules:
+      Context
+      Elab
+      Eval
+      Parse
+      Pretty
+      Subst
+      Syntax
+      Paths_dpm_nbe
+  hs-source-dirs:
+      ./src
+  default-extensions:
+      LambdaCase
+      NoMonomorphismRestriction
+      OverloadedStrings
+      PatternSynonyms
+      RecordWildCards
+      StandaloneDeriving
+      Strict
+      TupleSections
+      DerivingVia
+      ViewPatterns
+      FunctionalDependencies
+  ghc-options: -Wall -Wno-name-shadowing -Wno-missing-signatures -Wno-unused-do-bind -Wno-unused-matches -O
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , megaparsec
+    , mtl
+    , transformers
+  default-language: Haskell2010

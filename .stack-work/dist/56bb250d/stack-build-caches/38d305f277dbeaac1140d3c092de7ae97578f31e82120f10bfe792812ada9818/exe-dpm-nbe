@@ -1,0 +1,22 @@
+? C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\.stack-work\dist\56bb250d\build\dpm-nbe\autogen\Paths_dpm_nbe.hs
+: hash: cc2a21ec9d7468dea991c27b66d9eb46adb5cf8a54b63569f8073443288ad94c
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\dpm-nbe.cabal:
+  hash: 2c97b0ae94d1bc1a6908ead85143e5c0b45fa33bae1aefc4ad56c23b72b58e2f
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\package.yaml:
+  hash: 9c0a8a07f085a4a2f13adc846110a101dd2572ea0b3bfac8906a310023e9bdc6
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Context.hs:
+  hash: e50ebac7e53d92428a0b13f86f2e5652ec0e8b410f382d85c4513c71bccf79cb
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Elab.hs:
+  hash: 11a0dd5797d2a35d7cb9e2e9db651051af6b69c13de54c07bcc53c34f527f1b0
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Eval.hs:
+  hash: 4330350ceed5c8c5041b0e5224cf5d0516e60a8a3bd72655ae3e826e5f0877c4
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Main.hs:
+  hash: 0dd8f4258f19ed848dcb03db458a428bc4746d8543c04b8c5d5f80b996cc910d
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Parse.hs:
+  hash: 4666fbf92b94e63e77d8c0b38df75100eeadd8e92be2196cdfd878b95ef1b46d
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Pretty.hs:
+  hash: b7fad9d1630a080dad79400089a470654a3ca77c3e5299ff76be28f0ae91bf20
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Subst.hs:
+  hash: 62767f54dbe053e38362cd73847cb1e88ea0302c9c30829bbdf376ce68e0e40a
+C:\Users\86158\temp\elaboration-zoo\02-typecheck-closures-debruijn\src\Syntax.hs:
+  hash: 0c7d6db127b7d489392a473c9a4241e2bab507e3723e4bd62077ea57604c1ccd
