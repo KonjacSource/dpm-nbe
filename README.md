@@ -1,6 +1,6 @@
 ## DPM-NBE
 
-Experiments for implementing Dependent Pattern Matching under Normalization by Evaluation setup.
+Experiments on implementing Dependent Pattern Matching under Normalization by Evaluation setup.
 
 ### Syntax
 
