@@ -8,7 +8,6 @@ import Pretty
 import Control.Monad
 import Text.Printf
 import GHC.Stack
-import Debug.Trace (trace)
 
 -- Unification for DPM
 --------------------------------------------------------------------------------
@@ -16,7 +15,11 @@ import Debug.Trace (trace)
 -- Ref: Jesper Cockx. Dominique Devriese. Frank Piessens. Pattern Matching Without K 
 --      Ulf Norell. Towards a Practical Programming Language Based on Dependent Type Theory
 -- Note. we do "with-K" here, but it is not a problem to do "without-K" 
--- TODO: Occurs Checking. need lookup the type
+-- TODO: 1. Occurs Checking. need lookup the type
+--       2. Limit the unifying context, 
+--          only variables introduced by the current lambda-case can be unified, 
+--          this also means we do not have to apply the unifier to the whole context, 
+--          but only the lambda-case variables.
 
 -- | UnifyRes Δ : Type
 data UnifyRes  
@@ -117,10 +120,8 @@ expect_an_id = "Expected an identity type for pattern '%s', but got:\n\n  %s"
 checkPM :: HasCallStack => Ctx -> [Pn] -> Raw -> Val -> M Tm
 checkPM ctx ps t ty = case (ps, frc ty) of
   ([], ty) -> 
-    trace ("done checking patterns, get context: \n" ++ showCtx ctx ++ "------------------\n" ++ showVal ctx ty ++ "\n") $
     check ctx t ty 
   (p:ps, VPi x a b) -> 
-    trace ("checking pattern: " ++ show p ++ " : " ++ showVal ctx a) $ 
     case p of 
     PVar x' -> do 
       let ctx' = bindCtx x' a ctx
@@ -132,7 +133,6 @@ checkPM ctx ps t ty = case (ps, frc ty) of
     PRefl -> case frc a of 
       VId a x y -> case unify ctx (lvl ctx) [(x, y)] of
         USucc _ sub -> do 
-          trace ("- get unifier: \n" ++ showSub ctx sub) $ pure ()
           e <- checkPM (subst sub ctx) ps t (subst sub b $$ VRefl)
           case e of 
             Lam ps rhs -> pure (Lam (p : ps) rhs)

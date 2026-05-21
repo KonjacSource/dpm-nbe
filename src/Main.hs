@@ -52,6 +52,48 @@ ex5 = main' "nf" $ unlines [
   " λ A a b c d e f g h refl refl refl refl refl refl refl . refl; U"
   ]
 
+ex6 = main' "type" $ unlines [
+  "let trans10 : (A : U) (a b c d e f g h i j k : A)",
+    "-> Id A a b",
+    "-> Id A b c",
+    "-> Id A c d",
+    "-> Id A d e",
+    "-> Id A e f",
+    "-> Id A f g",
+    "-> Id A g h",
+    "-> Id A h i",
+    "-> Id A i j",
+    "-> Id A j k",
+    "-> Id A a k =",
+  " λ A a b c d e f g h i j k refl refl refl refl refl refl refl refl refl refl . refl; U"
+  ]
+
+genTrans :: Int -> String 
+genTrans n = "let trans" 
+          ++ show n ++ " : (A : U) " ++ binders ++ args ++ retType ++ " = " 
+          ++ " λ A " ++ vars ++ refls ++ " . refl; U" where 
+  binders = concat [ "(a" ++ show i ++ " : A) " | i <- [1..n] ]
+  args = concat [ "-> Id A a" ++ show i ++ " a" ++ show (i + 1) ++ " " | i <- [1..n-1] ]
+  retType = "-> Id A a1 a" ++ show n
+  vars = concat [ "a" ++ show i ++ " " | i <- [1..n] ]
+  refls = concat [ "refl " | i <- [1..n-1] ]
+
+genTransAgda :: Int -> String
+genTransAgda n = agdaId ++ "\ntrans" ++ show n ++ " : {A : Set} " ++ binders ++ args ++ retType ++ "\n" 
+            ++ "trans" ++ show n ++ " {A} " ++ vars ++ refls ++ " = refl" where
+  agdaId = unlines [
+    "data Id (A : Set) (x : A) : A -> Set where",
+    "  refl : Id A x x"
+    ]
+  binders = concat [ "(a" ++ show i ++ " : A) " | i <- [1..n] ]
+  args = concat [ "-> Id A a" ++ show i ++ " a" ++ show (i + 1) ++ " " | i <- [1..n-1] ]
+  vars = concat [ "a" ++ show i ++ " " | i <- [1..n] ]
+  refls = concat [ "refl " | i <- [1..n-1] ]
+  retType = "-> Id A a1 a" ++ show n
+
+exTransn :: Int -> IO ()
+exTransn n = (main' "nf" $ genTrans n) >> putStrLn "done."
+
 -- main
 --------------------------------------------------------------------------------
 
