@@ -53,5 +53,3 @@ insertSub g x v = Sub (g - 1) g (go 0 Sp) where
   go j acc | x == j = go (j + 1) (acc :> v)
            | j == g = acc
            | otherwise = go (j + 1) (acc :> VVar j)
-
-

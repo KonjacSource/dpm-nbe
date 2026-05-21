@@ -61,12 +61,12 @@ prettyTm prec = go prec where
       prettyPn t ns (PRefl : ps) = ("refl "++) . prettyPn t ns ps
       prettyPn t ns (PAbs  : ps) = ("(!) " ++) . prettyPn t ns ps
 
-    Id a x y                  -> par p appp $ ("Id "++) . go appp ns a . (' ':) . go appp ns x . (' ':) . go appp ns y
+    Id a x y                  -> par p appp $ ("Id "++) . go atomp ns a . (' ':) . go atomp ns x . (' ':) . go atomp ns y
     Refl                      -> ("refl"++)
     Nat                       -> ("Nat"++)
     Zero                      -> ("zero"++)
-    Succ n                    -> par p appp $ ("succ "++) . go appp ns n
-    Plus m n                  -> par p appp $ ("plus "++) . go appp ns m . (' ':) . go appp ns n
+    Succ n                    -> par p appp $ ("succ "++) . go atomp ns n
+    Plus m n                  -> par p appp $ ("plus "++) . go atomp ns m . (' ':) . go atomp ns n
     Bot                       -> ("⊥"++)
 
 

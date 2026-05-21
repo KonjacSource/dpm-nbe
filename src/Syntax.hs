@@ -73,7 +73,12 @@ data Pn
   = PVar Name
   | PRefl
   | PAbs
-  deriving Show
+
+instance Show Pn where 
+  show = \case 
+    PVar x -> x
+    PRefl -> "refl"
+    PAbs -> "(!)"
 
 -- values
 ------------------------------------------------------------

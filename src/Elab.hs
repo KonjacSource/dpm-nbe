@@ -117,11 +117,10 @@ expect_an_id = "Expected an identity type for pattern '%s', but got:\n\n  %s"
 checkPM :: HasCallStack => Ctx -> [Pn] -> Raw -> Val -> M Tm
 checkPM ctx ps t ty = case (ps, frc ty) of
   ([], ty) -> 
-    trace ("done checking patterns, get context: \n" ++ showCtx ctx ) $
+    trace ("done checking patterns, get context: \n" ++ showCtx ctx ++ "------------------\n" ++ showVal ctx ty ++ "\n") $
     check ctx t ty 
   (p:ps, VPi x a b) -> 
-    trace ("checking pattern: " ++ show p ++ ".") $ 
-    trace ("- type: " ++ showVal ctx a ++ ".") $
+    trace ("checking pattern: " ++ show p ++ " : " ++ showVal ctx a) $ 
     case p of 
     PVar x' -> do 
       let ctx' = bindCtx x' a ctx

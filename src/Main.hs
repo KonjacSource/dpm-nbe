@@ -37,6 +37,21 @@ ex4 = main' "nf" $ unlines [
   "let C : (A : U) -> Id Nat (suc zero) zero -> A = ",
   " λ A (!); U"
   ]
+
+
+ex5 = main' "nf" $ unlines [
+  "let trans1 : (A : U) (a b c d e f g h: A)",
+    "-> Id A a b",
+    "-> Id A b c",
+    "-> Id A c d",
+    "-> Id A d e",
+    "-> Id A e f",
+    "-> Id A f g",
+    "-> Id A g h",
+    "-> Id A a h =",
+  " λ A a b c d e f g h refl refl refl refl refl refl refl . refl; U"
+  ]
+
 -- main
 --------------------------------------------------------------------------------
 
