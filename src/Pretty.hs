@@ -5,6 +5,8 @@ import Syntax
 import Context 
 import Eval 
 import GHC.Stack (HasCallStack)
+import qualified Data.IntMap as IM
+
 
 fresh :: [Name] -> Name -> Name
 fresh ns "_" = "_"
@@ -87,9 +89,9 @@ showCtx' ctx@Ctx{..} = unlines $ go (zip types (reverse $ sp2ls (getEnv env))) w
   go (((x, ty), v):ts) = go ts ++ pure (x ++ " : " ++ showVal ctx ty ++ " := " ++ showVal ctx v) 
 
 showSub :: HasCallStack => Ctx -> Sub -> String
-showSub ctx@Ctx{..} s = unlines $ go (zip names (reverse $ sp2ls (subs s))) where 
+showSub ctx s = unlines $ go (IM.toList $ subs s) where 
   go [] = []
-  go ((x, v):xs) = (x ++ " -* " ++ showVal ctx v) : go xs
+  go ((x, v):xs) = (showVal ctx (VVar (Lvl x)) ++ " -* " ++ showVal ctx v) : go xs
 
 
 instance Show' Ctx where 

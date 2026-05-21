@@ -1,15 +1,16 @@
 module Syntax where 
 
 import Text.Megaparsec
+import Data.IntMap (IntMap)
 
 -- syntax
 --------------------------------------------------------------------------------
 
 -- | De Bruijn index.
-newtype Ix  = Ix  Int deriving (Eq, Show, Num, Ord) via Int
+newtype Ix  = Ix { unIx :: Int } deriving (Eq, Show, Num, Ord) via Int
 
 -- | De Bruijn level.
-newtype Lvl = Lvl Int deriving (Eq, Show, Num, Ord) via Int
+newtype Lvl = Lvl { unLvl :: Int } deriving (Eq, Show, Num, Ord) via Int
 
 
 type Name = String
@@ -103,7 +104,8 @@ instance Show Sub where
 infixl 5 :>
 data Spine = Sp | Spine :> Val deriving Show
 
-data Sub = Sub { dom :: Lvl, cod :: Lvl, subs :: Spine}
+-- level indexed.
+data Sub = Sub { dom :: Lvl, cod :: Lvl, subs :: IntMap Val }
 
 type VTy = Val
 data Val
@@ -215,6 +217,5 @@ instance Show' Closure where
   show' = show 
 
 instance Show' Sub where 
-  show' Sub{..} = show dom ++ " -> " ++ show cod ++ " ix:{" ++ go "" 0 subs ++ "}" where 
-    go acc i Sp = acc
-    go acc i (vs:>v) = go acc (i + 1) vs ++ show i ++ " -* " ++ show' v ++ "; "
+  show' Sub{..} = show dom ++ " -> " ++ show cod ++ " lvl:{" ++ show subs ++ "}" where 
+

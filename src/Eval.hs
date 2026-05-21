@@ -3,6 +3,7 @@ module Eval where
 import Syntax 
 import Subst 
 import GHC.Stack
+import qualified Data.IntMap as IM
 
 lvl2Ix :: Lvl -> Lvl -> Ix
 lvl2Ix (Lvl l) (Lvl x) = Ix (l - x - 1)
@@ -19,11 +20,11 @@ instance SubAction Sub where
   -- subst :: Sub Γ Δ -> Sub Δ Θ -> Sub Γ Θ
   subst s2 s1@(Sub d c s) 
     | d > cod s2 = error "sub: (co)domain mismatch"
-    | otherwise = Sub (dom s1) c (go s2 s) where 
-        go s2 = \case 
-          Sp -> Sp 
-          s :> u -> go s2 s :> subst s2 u
-
+    | otherwise = Sub 
+        { dom = (dom s1)
+        , cod = c
+        , subs = IM.union (IM.map (subst s2) s) (subs s2) } 
+        
 instance SubAction a => SubAction [a] where 
   subst s = map (subst s)
 
