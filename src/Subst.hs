@@ -22,10 +22,6 @@ emptySub :: HasCallStack => Lvl -> Sub
 emptySub d = Sub d 0 emptySubMap
 {-# inline emptySub #-}
 
-wkSub :: HasCallStack => Lvl -> Sub -> Sub
-wkSub n s = undefined
-{-# inline wkSub #-}
-
 define :: HasCallStack =>  Env -> Val -> Env 
 define (Env vs) v = Env (vs :> v)
 {-# inline define #-}

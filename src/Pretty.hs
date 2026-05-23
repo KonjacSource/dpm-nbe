@@ -93,7 +93,6 @@ showSub ctx s = unlines $ go (IM.toList $ subs s) where
   go [] = []
   go ((x, v):xs) = (showVal ctx (VVar (Lvl x)) ++ " -* " ++ showVal ctx v) : go xs
 
-
 instance Show' Ctx where 
   show' Ctx{..} = "Ctx: \n" ++ unlines (go $ zip types (sp2ls (getEnv env))) where 
     go [] = []
