@@ -28,6 +28,17 @@ Note.
 - For simplicity, we only have ```refl``` , absurd pattern ```(!)``` and variables as patterns, ```zero``` and ```suc``` is not a pattern.
   It is just to show DEPENDENT pattern matching.
 
+### Difficulty of DPM under NbE
+
+The problem is that, for example, when we checking the following pattern matching
+
+```agda
+let H : (m n : Nat) -> Id Nat n (plus m zero) -> Id Nat m zero -> ... 
+  λ m n refl refl . ...  
+```
+
+For the first ```refl```, we need to unify ```n``` with ```plus m zero```, extending the evaluation environment with ```n = plus m zero```, which is a value (corresponding to a normal form). But the second ```refl``` gives ```m = zero```, which makes the ```plus m zero [zero/m]``` no more a normal form.
+
 ### Acknowledgements
 
 - The base code is directly copied from [András Kovács](https://andraskovacs.github.io/)' [elaboration zoo](https://github.com/AndrasKovacs/elaboration-zoo).
