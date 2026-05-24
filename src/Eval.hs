@@ -133,7 +133,7 @@ match ps n cl sp = go Sp (ps, sp2ls sp) where
       (PAbs  ,  _)    -> block $ VNe $ NLam ps n cl sp
       _               -> block $ VNe $ NLam ps n cl sp
 
--- eval :: (γ : Sub X G) -> Env G D -> Tm D -> Val X?
+-- eval :: Env Γ Δ -> Tm Δ -> Val Γ
 eval :: Env -> Tm -> Val 
 eval env = \case 
   Var x       -> lookupEnv x env
