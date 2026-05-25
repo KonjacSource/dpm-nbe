@@ -52,26 +52,26 @@ unify1 Γ = \case
 
 -- | unify : (Δ : Cx) -> [(Val Δ, Val Δ)] -> UnifyRes Δ
 unify :: HasCallStack => Ctx -> Lvl -> [(Val, Val)] -> UnifyRes
-unify ctx d vs = unifyS ctx d d (idSub d) vs
+unify ctx d vs = unifyS d d (idSub d) vs
 
 -- | unifyS : (Δ Γ : Cx) -> Sub Γ Δ -> [(Val Γ, Val Γ)] -> UnifyRes Δ
-unifyS :: HasCallStack => Ctx -> Lvl -> Lvl -> Sub -> [(Val, Val)] -> UnifyRes
-unifyS ctx d _ γ [] = USucc d γ
-unifyS ctx d g γ ((v1, v2) : vs) = case unify1 ctx g v1 v2 of 
-  USucc s ɑ  -> unifyS ctx d s (subst ɑ γ) (subst ɑ vs)
+unifyS :: HasCallStack => Lvl -> Lvl -> Sub -> [(Val, Val)] -> UnifyRes
+unifyS d g γ [] = USucc g γ
+unifyS d g γ ((v1, v2) : vs) = case unify1 g v1 v2 of 
+  USucc s ɑ  -> unifyS d s (subst ɑ γ) (subst ɑ vs)
   UAbs       -> UAbs
   UIDK       -> UIDK
 
 -- | unify1 : (Γ : Cx) -> Val Γ -> Val Γ -> UnifyRes Γ
-unify1 :: HasCallStack => Ctx -> Lvl -> Val -> Val -> UnifyRes
-unify1 ctx g u v = case (frc u, frc v) of 
+unify1 :: HasCallStack => Lvl -> Val -> Val -> UnifyRes
+unify1 g u v = case (frc u, frc v) of 
   (VVar x, VVar y) | x == y -> USucc g (idSub g)
   (VVar x, v) -> USucc (g - 1) (insertSub g x v) -- TODO: occurs checking make sure that v : Val (Γ/{x}) 
   (v, VVar x) -> USucc (g - 1) (insertSub g x v) 
 
   (VRefl, VRefl) -> USucc g (idSub g)
   (VZero, VZero) -> USucc g (idSub g)
-  (VSucc m, VSucc n) -> unify1 ctx g m n -- injective
+  (VSucc m, VSucc n) -> unify1 g m n -- injective
   (VZero , VSucc _)  -> UAbs
   (VSucc _, VZero)   -> UAbs
 
