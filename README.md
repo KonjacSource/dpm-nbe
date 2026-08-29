@@ -25,12 +25,13 @@ U
 Note.
 
 - ```plus```, ```suc```, ```Id``` must be fully applied.
-- For simplicity, we only have ```refl``` , absurd pattern ```(!)``` and variables as patterns, ```zero``` and ```suc``` is not a pattern.
-  It is just to show DEPENDENT pattern matching.
+- For simplicity, we only have ```refl``` , absurd pattern ```(!)``` and variables as patterns, ```zero``` and ```suc``` are not patterns.
+
+  The idea is to isolate DEPENDENT part from dependent pattern matching. 
 
 ### Difficulty of DPM under NbE
 
-The problem is that, for example, when we checking the following pattern matching
+The problem is that a value is not stable under substitution, for example, when we checking the following pattern matching
 
 ```agda
 let H : (m n : Nat) -> Id Nat n (plus m zero) -> Id Nat m zero -> ... 
