@@ -112,7 +112,7 @@ i'm_not_sure :: String
 i'm_not_sure = "I am not sure if there should be a pattern '%s' for equation between %s and %s."
 
 it_should_not_be :: String 
-it_should_not_be = "It should not be '%s' for equation between %s and %s, in fact you shold try absurd pattern '%s'."
+it_should_not_be = "It should not be '%s' for equation between %s and %s, in fact you should try pattern '%s'."
 
 expect_an_id :: String
 expect_an_id = "Expected an identity type for pattern '%s', but got:\n\n  %s"
