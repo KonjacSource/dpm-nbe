@@ -146,7 +146,6 @@ checkPM ctx ps t ty = case (ps, frc ty) of
       VId a x y -> case unify ctx (lvl ctx) [(x, y)] of
         USucc _ sub -> report ctx $ printf 
           it_should_not_be ("(!)" :: String) (showVal ctx x) (showVal ctx y) ("refl" :: String)
-          (showVal ctx x) (showVal ctx y) 
         UAbs     -> case (ps, t) of 
           ([], RBot) -> pure (Lam [PAbs] Bot) 
           _ -> report ctx $ printf 
@@ -168,7 +167,7 @@ infer ctx = \case
 
   RApp t u -> do
     (t, tty) <- infer ctx t
-    case tty of
+    case frc tty of
       VPi _ a b -> do
         u <- check ctx u a
         pure (App t u, b $$ eval (env ctx) u)   -- t u : B[x |-> u]

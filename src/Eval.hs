@@ -21,7 +21,7 @@ instance SubAction Sub where
   subst s2 s1@(Sub d c s) 
     | d > cod s2 = error "sub: (co)domain mismatch"
     | otherwise = Sub 
-        { dom = (dom s1)
+        { dom = (dom s2)
         , cod = c
         , subs = IM.union (IM.map (subst s2) s) (subs s2) } 
         
@@ -56,7 +56,7 @@ instance Force Res Val where
   frc  (Res v True) = frc v
   frc  (Res v _   ) = v
   frcS s (Res v True) = frcS s v
-  frcS s (Res v _   ) = v
+  frcS s (Res v _   ) = frcS s v
 
 instance Force Val Val where
   frc = \case 
@@ -74,6 +74,7 @@ instance Force Val Val where
     VNat -> VNat
     VZero -> VZero
     VSucc n -> VSucc (subst sb n)
+    VBot -> VBot
 
 instance Force Ne Val where 
   frc = \case 
@@ -129,9 +130,9 @@ match ps n cl sp = go Sp (ps, sp2ls sp) where
   go acc = \case 
     ([]  , rest) -> progress $ frc $ napp (capp n cl acc) (ls2sp rest)
     (_   , [])   -> block $ VNe $ NLam ps n cl sp
-    (p:ps, v:vs) -> case (p, frc v) of
-      (PVar x, v)     -> go (acc :> v) (ps, vs)
-      (PRefl , VRefl) -> go acc (ps, vs)
+    (p:ps', v:vs') -> case (p, frc v) of
+      (PVar x, v)     -> go (acc :> v) (ps', vs')
+      (PRefl , VRefl) -> go acc (ps', vs')
       (PAbs  ,  _)    -> block $ VNe $ NLam ps n cl sp
       _               -> block $ VNe $ NLam ps n cl sp
 
@@ -150,9 +151,9 @@ eval env = \case
   Zero        -> VZero
   Succ n      -> VSucc (eval env n)
   Plus m n    -> resVal $ plus (eval env m) (eval env n)
-  Bot         -> error "eval: impossible"
+  Bot         -> VBot
 
--- | Beta-eta conversion checking. Precondition: both values have the same type.
+-- | Conversion checking. Precondition: both values have the same type.
 conv :: Lvl -> Val -> Val -> Bool
 conv l t u = case (frc t, frc u) of
   (VU, VU) -> True
@@ -169,6 +170,7 @@ conv l t u = case (frc t, frc u) of
   (VZero , VZero) -> True
   (VSucc n, VSucc n') -> conv l n n'
   (VNat  , VNat) -> True
+  (VBot  , VBot) -> True
   _ -> False
 
 convSp :: Lvl -> Spine -> Spine -> Bool
@@ -181,9 +183,16 @@ convSp l sp sp' = case (frc sp, frc sp') of
 convNe :: Lvl -> Ne -> Ne -> Bool
 convNe l n n' = case (n, n') of
   (NVar v sp, NVar v' sp') -> v == v' && convSp l sp sp'
-  (NLam ps n cl sp, NLam ps' n' cl' sp') -> 
+  (NLam ps n cl sp, NLam ps' n' cl' sp')
+    | length ps == length ps' && all (uncurry comparePn) (zip ps ps') -> 
     convCl l n cl cl' && convSp l sp sp'
+  (NPlus m n, NPlus m' n') -> conv l m m' && conv l n n'
   _ -> False
+  where comparePn :: Pn -> Pn -> Bool
+        comparePn (PVar _) (PVar _) = True
+        comparePn PRefl PRefl = True
+        comparePn PAbs PAbs = True
+        comparePn _ _ = False
 
 newVars :: Lvl -> Lvl -> Spine
 newVars l n = mkSp 0 Sp where 
@@ -199,18 +208,6 @@ freeClosure l n cl = (capp n cl (newVars l n))
 
 -- Quotation 
 
-unSubNe :: Ne -> Ne
-unSubNe = \case
-  NSub n s -> unSubNeS s n
-  n        -> n
-
-unSubNeS :: Sub -> Ne -> Ne
-unSubNeS sub = \case
-  NSub n s           -> unSubNeS (subst sub s) n
-  NVar x sp          -> NVar x (subst sub sp)
-  NLam ps n cl sp    -> NLam ps n (subst sub cl) (subst sub sp)
-  NPlus u v          -> NPlus (subst sub u) (subst sub v)
-
 class Quote a where 
   quote :: HasCallStack => Lvl -> a -> Tm
 
@@ -225,12 +222,16 @@ instance Quote Val where
     VNat -> Nat
     VZero -> Zero
     VSucc n -> Succ (quote l n)
+    VBot -> Bot
 
 instance Quote Ne where
-  quote l n = case unSubNe n of 
+  -- n must be forced
+  quote l n = case n of 
     NSub n sb -> error "quoteNe: impossible"
     NVar v sp -> foldl App (Var (lvl2Ix l v)) (map (quote l) (sp2ls sp))
-    NLam ps n cl sp -> Lam ps (quote (l + numPVars ps) (capp n cl (newVars l (numPVars ps)))) 
+    NLam ps n cl sp -> foldl App 
+                          (Lam ps (quote (l + numPVars ps) (capp n cl (newVars l (numPVars ps)))))
+                          (map (quote l) (sp2ls sp))
     NPlus u v -> Plus (quote l u) (quote l v)
 
 nf :: Env -> Tm -> Tm 

@@ -118,6 +118,7 @@ data Val
   | VNat 
   | VZero 
   | VSucc Val 
+  | VBot
   deriving Show
 
 data Ne 
@@ -202,6 +203,7 @@ instance Show' Val where
     VNat -> "Nat"
     VZero -> "zero"
     VSucc n -> "(succ " ++ show' n ++ ")"
+    VBot -> "(!)"
     
 instance Show' Ne where
   show' = \case 
