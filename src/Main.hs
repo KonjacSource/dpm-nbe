@@ -38,6 +38,9 @@ ex4 = main' "nf" $ unlines [
   " λ A (!); U"
   ]
 
+ex5 = main' "nf" $ unlines [
+  "let pr : (Nat -> Nat) -> Nat -> Nat = λ f x . f x; pr"
+  ]
 
 genTransN :: Int -> String 
 genTransN n = "let trans" 

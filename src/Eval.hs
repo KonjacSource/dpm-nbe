@@ -79,7 +79,9 @@ instance Force Ne Val where
   frc = \case 
     NSub n sb       -> frcS sb n 
     NVar v sp       -> VNe $ NVar v (frc sp)
-    NLam ps n cl sp -> frc $ napp (VNe $ NLam ps n cl Sp) (frc sp)
+    NLam ps n cl sp
+      | len sp == 0 -> VNe $ NLam ps n cl sp
+      | otherwise -> frc $ napp (VNe $ NLam ps n cl Sp) (frc sp)
     NPlus u v       -> frc $ plus (frc u) (frc v)
 
   frcS sb = \case 
