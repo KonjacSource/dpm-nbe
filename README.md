@@ -25,7 +25,7 @@ U
 Note.
 
 - ```plus```, ```suc```, ```Id``` must be fully applied.
-- ```plus``` is recurse on left argument, hence ```plus m zero``` is a neutral form.
+- ```plus``` is recursing on left argument, hence ```plus m zero``` is a neutral form.
 - For simplicity, we only have ```refl``` , absurd pattern ```(!)``` and variables as patterns, ```zero``` and ```suc``` are not patterns.
 
   The idea is to isolate DEPENDENT part from dependent pattern matching. 
