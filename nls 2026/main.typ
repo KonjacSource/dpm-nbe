@@ -437,7 +437,7 @@ But we want to avoid substitution in NbE, because it breaks the sharing.
 
 A solution is to use a *delayed substitution*, which is a substitution that is not applied immediately, but is stored in the evaluation environment and applied when needed. 
 
-This solution is proposed by András Kovács.
+This solution is proposed by András Kovács' cctt.
 
 == Dependent Pattern Matching Meets NbE
 
@@ -492,10 +492,30 @@ when we construct a ```hs VSub```, the ```hs result``` field is lazy.
 	edge((1, 1), (0, -1), "->")
 }))
 
-== Dependent Pattern Matching Meets NbE
+== NOTE
 
- But to my experience, the original solution is good enough for dependent pattern matching.
+after the presentation, I tried to use glued evaluation to implement dependent pattern matching.
 
+turns out, 
 
+no need to do glueing
 
-Nope. glued is wayyyyyyyyyyy faster.
+```hs
+data Value 
+  = ... 
+  | VSub (v : Value) (σ : Sub) (~ result : Value)
+```
+is not necessary
+
+we can directly use
+```hs
+data Value 
+  = ... 
+  | VD (~ result : Value)
+```
+
+and we keep the sharing.
+
+I think we can call this *delayed substitution*
+
+It is faster and simpler than main branch
