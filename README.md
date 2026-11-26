@@ -74,7 +74,7 @@ E.g. for
 
 ```hs
 -- psudo code
-let trans400 : Id _ a1 a2 -> Id _ a2 a3 -> ... -> Id _ a400 a401 = 
+let trans400 : Id _ a1 a2 -> Id _ a2 a3 -> ... -> Id _ a1 a400 = 
   λ refl refl ... refl . refl;
 ```
 
