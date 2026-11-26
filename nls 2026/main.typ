@@ -336,7 +336,6 @@ $
 \
 Lean is also undecidable, due to the presence of *proof irrelevant inductive propositions.*
 
-
 == Dependent Pattern Matching
 
 *Quick history of pattern matching*
