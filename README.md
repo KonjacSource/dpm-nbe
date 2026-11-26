@@ -78,6 +78,7 @@ let trans400 : Id _ a1 a2 -> Id _ a2 a3 -> ... -> Id _ a400 a401 =
   λ refl refl ... refl . refl;
 ```
 
-branch main casts to 40s, while the new solution takes only 0.188s
+branch main casts to 40s, while the new solution takes only 0.188s. 
+Agda costs around half a minute.
 
 See [delayed-subst](https://github.com/KonjacSource/dpm-nbe/tree/delayed-subst) for the detailed implementation. 
