@@ -494,4 +494,8 @@ when we construct a ```hs VSub```, the ```hs result``` field is lazy.
 
 == Dependent Pattern Matching Meets NbE
 
-But to my experience, the original solution is good enough for dependent pattern matching.
+ But to my experience, the original solution is good enough for dependent pattern matching.
+
+
+
+Nope. glued is wayyyyyyyyyyy faster.

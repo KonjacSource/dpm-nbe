@@ -13,7 +13,31 @@ class SubAction a where
 
 class Force a b | a -> b where
   frc :: HasCallStack => a -> b
-  frcS :: HasCallStack => Sub -> a -> b
+
+substStrict :: Sub -> Val -> Val
+substStrict s = \case
+  VD v -> substStrict s v
+  VNe n -> substStrictN s n 
+  VU -> VU
+  VPi x a cl -> VPi x (substStrict s a) (subst s cl)
+  VId a x y -> VId (substStrict s a) (substStrict s x) (substStrict s y)
+  VRefl -> VRefl
+  VNat -> VNat
+  VZero -> VZero
+  VSucc n -> VSucc (substStrict s n)
+  VBot -> VBot
+
+substStrictSp :: Sub -> Spine -> Spine
+substStrictSp s = \case 
+  Sp -> Sp
+  sp :> v -> substStrictSp s sp :> substStrict s v
+
+substStrictN :: Sub -> Ne -> Val
+substStrictN s = \case
+  ND v -> substStrict s v
+  NVar v sp -> (lookupSub s v) `napp` substStrictSp s sp
+  NLam ps n cl sp -> match ps n (subst s cl) (substStrictSp s sp)
+  NPlus m n -> plus (substStrict s m) (substStrict s n)
 
 instance SubAction Sub where
   -- subst s2 s1 = s1[s2] = s1 ∘ s2 
@@ -39,80 +63,57 @@ instance SubAction Closure where
 
 instance SubAction Ne where 
   subst s = \case
-    NSub n sb -> NSub n (subst s sb)
-    n -> NSub n s
+    ND r -> ND (substStrict  s r) 
+    n    -> ND (substStrictN s n)
 
 instance SubAction Val where
   subst s = \case 
-    VSub v sb -> VSub v (subst s sb)
-    v -> VSub v s
+    VD v -> VD (substStrict s v)
+    v    -> VD (substStrict s v)
 
 instance SubAction Spine where 
   subst s = \case 
     Sp -> Sp 
     sp :> v -> subst s sp :> subst s v
 
-instance Force Res Val where 
-  frc  (Res v True) = frc v
-  frc  (Res v _   ) = v
-  frcS s (Res v True) = frcS s v
-  frcS s (Res v _   ) = frcS s v
-
 instance Force Val Val where
   frc = \case 
-    VSub v sb -> frcS sb v 
+    VD v -> frc v
     VNe n -> frc n
     v -> v 
   
-  frcS sb = \case 
-    VSub v sb' -> frcS (subst sb sb') v 
-    VNe n -> frcS sb n 
-    VU -> VU 
-    VPi x a cl -> VPi x (subst sb a) (subst sb cl)
-    VId a x y -> VId (subst sb a) (subst sb x) (subst sb y)
-    VRefl -> VRefl
-    VNat -> VNat
-    VZero -> VZero
-    VSucc n -> VSucc (subst sb n)
-    VBot -> VBot
-
 instance Force Ne Val where 
   frc = \case 
-    NSub n sb       -> frcS sb n 
-    NVar v sp       -> VNe $ NVar v (frc sp)
+    ND n            -> frc n
+    NVar v sp       -> VNe $ NVar v sp
     NLam ps n cl sp
       | len sp == 0 -> VNe $ NLam ps n cl sp
-      | otherwise -> frc $ napp (VNe $ NLam ps n cl Sp) (frc sp)
-    NPlus u v       -> frc $ plus (frc u) (frc v)
+      | otherwise   -> napp (VNe $ NLam ps n cl Sp) (frc sp)
+    NPlus u v       -> plus (frc u) (frc v)
 
-  frcS sb = \case 
-    NSub n sb'      -> frcS (subst sb sb') n 
-    NVar v sp       -> frc $ napp (lookupSub sb v) (frcS sb sp)
-    NLam ps d cl sp -> frc $ match ps d (subst sb cl) (frcS sb sp)
-    NPlus u v       -> frc $ plus (frcS sb u) (frcS sb v)
 
 instance Force Spine Spine where 
   frc = \case 
     Sp -> Sp 
     sp :> v -> frc sp :> frc v
   
-  frcS sb = \case
-    Sp -> Sp 
-    sp :> v -> frcS sb sp :> frcS sb v
+  -- frcS sb = \case
+  --   Sp -> Sp 
+  --   sp :> v -> frcS sb sp :> frcS sb v
 
-plus :: Val -> Val -> Res 
+plus :: Val -> Val -> Val 
 plus m n = case m of  
-  VZero   -> progress n
-  VSucc m -> progress $ VSucc (frc $ plus m n)
-  _ -> block $ VNe $ NPlus m n
+  VZero   -> n
+  VSucc m -> VSucc (frc $ plus m n)
+  _ -> VNe $ NPlus m n
 
-napp :: HasCallStack => Val -> Spine -> Res
+napp :: HasCallStack => Val -> Spine -> Val
 napp v sp = case frc v of 
-  v | len sp == 0 -> progress v
-  VNe (NVar n sp') -> block $ VNe $ NVar n (sp' +++ sp)
+  v | len sp == 0 -> v
+  VNe (NVar n sp') -> VNe $ NVar n (sp' +++ sp)
   VNe (NLam ps n cl sp') 
     | len sp + len sp' >= n -> match ps n cl (sp' +++ sp)
-    | otherwise -> block $ VNe $ NLam ps n cl (sp' +++ sp) 
+    | otherwise -> VNe $ NLam ps n cl (sp' +++ sp) 
   v -> error $ "napp: impossible ++ v = " ++ show' v ++ " sp = " ++ show' sp
 
 -- | Precondition: length of spine must be exactly the number of binders in the closure.
@@ -124,23 +125,23 @@ infixl 8 $$
 ($$) :: Closure -> Val -> Val
 cl $$ v = capp 1 cl (Sp :> v)
 
-match :: [Pn] -> Lvl -> Closure -> Spine -> Res
+match :: [Pn] -> Lvl -> Closure -> Spine -> Val
 match ps n cl sp = go Sp (ps, sp2ls sp) where
-  go :: Spine -> ([Pn], [Val]) -> Res
+  go :: Spine -> ([Pn], [Val]) -> Val
   go acc = \case 
-    ([]  , rest) -> progress $ frc $ napp (capp n cl acc) (ls2sp rest)
-    (_   , [])   -> block $ VNe $ NLam ps n cl sp
+    ([]  , rest) -> frc $ napp (capp n cl acc) (ls2sp rest)
+    (_   , [])   -> VNe $ NLam ps n cl sp
     (p:ps', v:vs') -> case (p, frc v) of
       (PVar x, v)     -> go (acc :> v) (ps', vs')
       (PRefl , VRefl) -> go acc (ps', vs')
-      (PAbs  ,  _)    -> block $ VNe $ NLam ps n cl sp
-      _               -> block $ VNe $ NLam ps n cl sp
+      (PAbs  ,  _)    -> VNe $ NLam ps n cl sp
+      _               -> VNe $ NLam ps n cl sp
 
 -- eval :: Env Γ Δ -> Tm Δ -> Val Γ
 eval :: Env -> Tm -> Val 
 eval env = \case 
   Var x       -> lookupEnv x env
-  App t u     -> resVal $ napp (eval env t) (Sp :> eval env u)
+  App t u     -> napp (eval env t) (Sp :> eval env u)
   Lam ps t    -> VNe $ NLam ps (numPVars ps) (Closure env t) Sp
   Pi x a b    -> VPi x (eval env a) (Closure env b)
   Let x _ t u -> let tv = eval env t in eval (define env tv) u
@@ -150,7 +151,7 @@ eval env = \case
   Nat         -> VNat
   Zero        -> VZero
   Succ n      -> VSucc (eval env n)
-  Plus m n    -> resVal $ plus (eval env m) (eval env n)
+  Plus m n    -> plus (eval env m) (eval env n)
   Bot         -> VBot
 
 -- | Conversion checking. Precondition: both values have the same type.
@@ -164,8 +165,8 @@ conv l t u = case (frc t, frc u) of
   (VRefl, VRefl) -> True
   (VNe n, VNe n') -> convNe l n n'
 
-  (VSub {}, _) -> error "conv: impossible"
-  ( _ , VSub {}) -> error "conv: impossible"
+  -- (VSub {}, _) -> error "conv: impossible"
+  -- ( _ , VSub {}) -> error "conv: impossible"
 
   (VZero , VZero) -> True
   (VSucc n, VSucc n') -> conv l n n'
@@ -214,7 +215,7 @@ class Quote a where
 instance Quote Val where
   quote l n = case frc n of 
     VNe n -> quote l n
-    VSub v sb -> error "quote: impossible"
+    VD v -> quote l v
     VU -> U
     VPi x a cl -> Pi x (quote l a) (quote (l + 1) (freeClosure l 1 cl))
     VId a x y -> Id (quote l a) (quote l x) (quote l y)
@@ -227,7 +228,7 @@ instance Quote Val where
 instance Quote Ne where
   -- n must be forced
   quote l n = case n of 
-    NSub n sb -> error "quoteNe: impossible"
+    ND n      -> quote l n
     NVar v sp -> foldl App (Var (lvl2Ix l v)) (map (quote l) (sp2ls sp))
     NLam ps n cl sp -> foldl App 
                           (Lam ps (quote (l + numPVars ps) (capp n cl (newVars l (numPVars ps)))))

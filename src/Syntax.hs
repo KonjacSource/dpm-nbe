@@ -110,7 +110,7 @@ data Sub = Sub { dom :: Lvl, cod :: Lvl, subs :: IntMap Val }
 type VTy = Val
 data Val
   = VNe Ne 
-  | VSub Val Sub 
+  | VD ~Val -- Delayed
   | VU
   | VPi Name ~VTy {-# unpack #-} Closure
   | VId VTy Val Val 
@@ -122,7 +122,7 @@ data Val
   deriving Show
 
 data Ne 
-  = NSub Ne Sub
+  = ND ~Val
   | NVar Lvl Spine
   | NLam [Pn] Lvl {-# unpack #-} Closure Spine
   -- ^ lambda case is not stable under substitution
@@ -131,17 +131,6 @@ data Ne
 
 pattern VVar :: Lvl -> Val
 pattern VVar v = VNe (NVar v Sp)
-
-data Res = Res { resVal :: !Val, resProgressed :: !Bool }
-
-block :: Val -> Res
-block v = Res v False
-{-# inline block #-}
-
-progress :: Val -> Res
-progress v = Res v True
-{-# inline progress #-}
-
 
 mapSp :: (Val -> Val) -> Spine -> Spine
 mapSp f = \case 
@@ -195,7 +184,7 @@ class Show' a where
 instance Show' Val where 
   show' = \case 
     VNe n -> show' n
-    VSub v s -> show' v ++ " [" ++ show' s ++ "]"
+    VD v -> show' v
     VU -> "U"
     VPi x a cl -> "(Pi " ++ x ++ " : " ++ show' a ++ ". " ++ show' cl ++ ")"
     VId a x y -> "(Id " ++ show' a ++ " " ++ show' x ++ " " ++ show' y ++ ")"
@@ -207,7 +196,7 @@ instance Show' Val where
     
 instance Show' Ne where
   show' = \case 
-    NSub n s -> show' n ++ " [" ++ show' s ++ "]"
+    ND n -> show' n
     NVar v sp -> "lvl " ++ show v ++ " " ++ show' sp
     NLam ps n cl sp -> "(NLam " ++ show ps ++ " " ++ show n ++ " " ++ show cl ++ " " ++ show' sp ++ ")"
     NPlus m n -> "(plus " ++ show' m ++ " " ++ show' n ++ ")"

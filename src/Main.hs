@@ -71,6 +71,16 @@ genTransNAgda n = agdaId ++ "\ntrans" ++ show n ++ " : {A : Set} " ++ binders ++
 exTransn :: Int -> IO ()
 exTransn n = (main' "nf" $ genTransN n) >> putStrLn "done."
 
+testAll :: IO ()
+testAll = do 
+  putStrLn "test ex0>>" >> ex0
+  putStrLn "test ex1>>" >> ex1
+  putStrLn "test ex2>>" >> ex2
+  putStrLn "test ex3>>" >> ex3
+  putStrLn "test ex4>>" >> ex4
+  putStrLn "test ex5>>" >> ex5
+  putStrLn "test exTransn 10>>" >> exTransn 10
+
 -- main
 --------------------------------------------------------------------------------
 
