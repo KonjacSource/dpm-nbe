@@ -492,20 +492,22 @@ when we construct a ```hs VSub```, the ```hs result``` field is lazy.
 	edge((1, 1), (0, -1), "->")
 }))
 
-== NOTE
+================== 
+
+== After NOTE
 
 after the presentation, I tried to use glued evaluation to implement dependent pattern matching.
 
 turns out, 
 
-no need to do glueing
+the glued evaluation 
 
 ```hs
 data Value 
   = ... 
   | VSub (v : Value) (σ : Sub) (~ result : Value)
 ```
-is not necessary
+is not necessary.
 
 we can directly use
 ```hs
